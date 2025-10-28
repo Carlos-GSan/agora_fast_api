@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from app.config.database import engine, create_db_and_tables
 from app.models.models import (
     TpoEvento, Region, Unidades, Oficial, 
-    Detenido, TipoMotivo, Motivos, Droga, Arma
+    Detenido, TipoMotivo, Motivos, Droga, Arma, TurnoEnum
 )
 from datetime import datetime
 

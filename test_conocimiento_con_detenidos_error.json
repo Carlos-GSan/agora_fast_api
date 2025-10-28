@@ -1,0 +1,27 @@
+{
+  "id_tpo_evento": 4,
+  "intervencion": "recorrido",
+  "id_region": 1,
+  "turno": "A",
+  "id_unidad_vehi": 1,
+  "folio_cecom": "CECOM-CONOC-002",
+  "colonia": "Centro",
+  "calle": "Av. Principal",
+  "narrativa": "Evento de conocimiento CON detenidos (DEBE FALLAR)",
+  "oficiales": [
+    {
+      "id_oficial": 1
+    }
+  ],
+  "detenidos": [
+    {
+      "id_detenido": 1,
+      "rnd_detenido": "RND-2024-002"
+    }
+  ],
+  "motivos": [
+    {
+      "id_mot": 1
+    }
+  ]
+}

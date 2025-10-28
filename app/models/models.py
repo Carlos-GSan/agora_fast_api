@@ -9,6 +9,14 @@ class TipoIntervencion(str, Enum):
     REPORTE = "reporte"
     OPERATIVO = "operativo"
 
+# Enum para turnos
+class TurnoEnum(str, Enum):
+    A = "A"
+    B = "B"
+    C = "C"
+    MIXTO = "Mixto"
+    DIARIO = "Diario"
+
 # Modelos SQLModel (combinan Pydantic y SQLAlchemy)
 
 class TpoEvento(SQLModel, table=True):
@@ -111,9 +119,9 @@ class Evento(SQLModel, table=True):
     id_tpo_evento: Optional[int] = Field(default=None, foreign_key="tpo_evento.id_tpo_evento")
     intervencion: Optional[TipoIntervencion] = Field(None, description="Tipo de intervención")
     id_region: Optional[int] = Field(default=None, foreign_key="region.id_region")
-    turno: Optional[str] = None
+    turno: Optional[TurnoEnum] = Field(None, description="Turno del evento")
     id_unidad_vehi: Optional[int] = Field(default=None, foreign_key="unidades.id_unidad_vehic")
-    folio_cecom: Optional[str] = None
+    folio_cecom: Optional[int] = Field(None, description="Folio CECOM (numérico)")
     colonia: Optional[str] = None
     calle: Optional[str] = None
     georreferencia: Optional[str] = None

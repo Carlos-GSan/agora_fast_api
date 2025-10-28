@@ -1,0 +1,30 @@
+{
+  "id_tpo_evento": 1,
+  "intervencion": "recorrido",
+  "id_region": 9,
+  "turno": "A",
+  "id_unidad_vehi": 1,
+  "folio_cecom": "CECOM-FISC-002",
+  "colonia": "Centro",
+  "calle": "Av. Principal",
+  "narrativa": "Evento de prueba con nuevas validaciones. Tipo de turno A, recorrido en región 9.",
+  "oficiales": [
+    {
+      "id_oficial": 1
+    },
+    {
+      "id_oficial": 2
+    }
+  ],
+  "detenidos": [
+    {
+      "id_detenido": 1,
+      "rnd_detenido": "RND-2024-001"
+    }
+  ],
+  "motivos": [
+    {
+      "id_mot": 1
+    }
+  ]
+}

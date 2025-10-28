@@ -1,0 +1,27 @@
+{
+  "id_tpo_evento": 3,
+  "intervencion": "reporte",
+  "id_region": 1,
+  "turno": "B",
+  "id_unidad_vehi": 1,
+  "folio_cecom": "CECOM-JUZG-001",
+  "colonia": "Centro",
+  "calle": "Av. Principal",
+  "narrativa": "Evento de Juzgado Cívico con motivo de Falta Administrativa",
+  "oficiales": [
+    {
+      "id_oficial": 1
+    }
+  ],
+  "detenidos": [
+    {
+      "id_detenido": 1,
+      "rnd_detenido": "RND-2024-003"
+    }
+  ],
+  "motivos": [
+    {
+      "id_mot": 3
+    }
+  ]
+}

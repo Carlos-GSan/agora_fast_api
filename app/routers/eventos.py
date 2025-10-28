@@ -2,7 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session, select
 from typing import List
 from app.config.database import get_session
-from app.models.models import Evento, OficialEvento, DetenidoEvento, MotivosEvento
+from app.models.models import (
+    Evento, OficialEvento, DetenidoEvento, MotivosEvento,
+    TpoEvento, Region, Unidades, Oficial, Motivos, Detenido, TipoMotivo
+)
 from app.schemas.evento_schemas import (
     EventoRead, EventoCreate, EventoUpdate, EventoReadWithRelations
 )
@@ -18,6 +21,98 @@ async def crear_evento(
     Crear un nuevo evento con asignación automática de folio IPH
     """
     try:
+        # Validar que el tipo de evento existe
+        tipo_evento = session.get(TpoEvento, evento.id_tpo_evento)
+        if not tipo_evento:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Tipo de evento con ID {evento.id_tpo_evento} no existe"
+            )
+        
+        # Validar que la región existe
+        region = session.get(Region, evento.id_region)
+        if not region:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Región con ID {evento.id_region} no existe"
+            )
+        
+        # Validar que la unidad vehicular existe
+        unidad = session.get(Unidades, evento.id_unidad_vehi)
+        if not unidad:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unidad vehicular con ID {evento.id_unidad_vehi} no existe"
+            )
+        
+        # Validar que todos los oficiales existen
+        oficiales_ids = [oficial.id_oficial for oficial in evento.oficiales]
+        statement = select(Oficial).where(Oficial.id_oficial.in_(oficiales_ids))
+        oficiales_existentes = session.exec(statement).all()
+        if len(oficiales_existentes) != len(oficiales_ids):
+            oficiales_existentes_ids = [o.id_oficial for o in oficiales_existentes]
+            oficiales_no_encontrados = [id_oficial for id_oficial in oficiales_ids if id_oficial not in oficiales_existentes_ids]
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Los siguientes oficiales no existen: {oficiales_no_encontrados}"
+            )
+        
+        # Validar que todos los motivos existen
+        motivos_ids = [motivo.id_mot for motivo in evento.motivos]
+        statement = select(Motivos).where(Motivos.id_mot.in_(motivos_ids))
+        motivos_existentes = session.exec(statement).all()
+        if len(motivos_existentes) != len(motivos_ids):
+            motivos_existentes_ids = [m.id_mot for m in motivos_existentes]
+            motivos_no_encontrados = [id_motivo for id_motivo in motivos_ids if id_motivo not in motivos_existentes_ids]
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Los siguientes motivos no existen: {motivos_no_encontrados}"
+            )
+        
+        # Validar que los detenidos existen (si se proporcionan)
+        if evento.detenidos:
+            detenidos_ids = [detenido.id_detenido for detenido in evento.detenidos]
+            statement = select(Detenido).where(Detenido.id_detenido.in_(detenidos_ids))
+            detenidos_existentes = session.exec(statement).all()
+            if len(detenidos_existentes) != len(detenidos_ids):
+                detenidos_existentes_ids = [d.id_detenido for d in detenidos_existentes]
+                detenidos_no_encontrados = [id_detenido for id_detenido in detenidos_ids if id_detenido not in detenidos_existentes_ids]
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Los siguientes detenidos no existen: {detenidos_no_encontrados}"
+                )
+        
+        # Validaciones específicas por tipo de evento
+        # Regla 1: Eventos tipo "Conocimiento" (ID=4) no pueden tener detenidos
+        if evento.id_tpo_evento == 4 and evento.detenidos:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Los eventos de tipo 'Conocimiento' no pueden tener detenidos"
+            )
+        
+        # Regla 2: Eventos tipo "Juzgado Cívico" (ID=3) solo pueden tener motivos de "Falta Administrativa" (tipo_motivo_id=2)
+        if evento.id_tpo_evento == 3:
+            # Verificar que todos los motivos sean de tipo "Falta Administrativa"
+            for motivo in motivos_existentes:
+                if motivo.tipo_motivo_id != 2:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Los eventos de tipo 'Juzgado Cívico' solo pueden tener motivos de tipo 'Falta Administrativa'. El motivo '{motivo.motivo}' es de tipo 'Delito'"
+                    )
+        
+        # Regla 3: Eventos tipo Fiscalía (ID=1), Denuncia (ID=2) y Conocimiento (ID=4) NO pueden tener motivos de "Falta Administrativa"
+        if evento.id_tpo_evento in [1, 2, 4]:
+            tipo_evento_nombres = {1: "Fiscalía", 2: "Denuncia", 4: "Conocimiento"}
+            tipo_evento_nombre = tipo_evento_nombres[evento.id_tpo_evento]
+            
+            # Verificar que ningún motivo sea de tipo "Falta Administrativa"
+            for motivo in motivos_existentes:
+                if motivo.tipo_motivo_id == 2:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Los eventos de tipo '{tipo_evento_nombre}' no pueden tener motivos de tipo 'Falta Administrativa'. El motivo '{motivo.motivo}' debe ser de tipo 'Delito'"
+                    )
+        
         # Crear el evento principal
         evento_data = evento.model_dump(exclude={"oficiales", "detenidos", "motivos"})
         db_evento = Evento(**evento_data)
@@ -25,15 +120,14 @@ async def crear_evento(
         session.flush()  # Para obtener el iph_id generado
         
         # Agregar oficiales al evento
-        if evento.oficiales:
-            for oficial_data in evento.oficiales:
-                oficial_evento = OficialEvento(
-                    iph_id=db_evento.iph_id,
-                    id_oficial=oficial_data.id_oficial
-                )
-                session.add(oficial_evento)
+        for oficial_data in evento.oficiales:
+            oficial_evento = OficialEvento(
+                iph_id=db_evento.iph_id,
+                id_oficial=oficial_data.id_oficial
+            )
+            session.add(oficial_evento)
         
-        # Agregar detenidos al evento
+        # Agregar detenidos al evento (opcional)
         if evento.detenidos:
             for detenido_data in evento.detenidos:
                 detenido_evento = DetenidoEvento(
@@ -44,19 +138,21 @@ async def crear_evento(
                 session.add(detenido_evento)
         
         # Agregar motivos al evento
-        if evento.motivos:
-            for motivo_data in evento.motivos:
-                motivo_evento = MotivosEvento(
-                    iph_id=db_evento.iph_id,
-                    id_mot=motivo_data.id_mot
-                )
-                session.add(motivo_evento)
+        for motivo_data in evento.motivos:
+            motivo_evento = MotivosEvento(
+                iph_id=db_evento.iph_id,
+                id_mot=motivo_data.id_mot
+            )
+            session.add(motivo_evento)
         
         session.commit()
         session.refresh(db_evento)
         
         return db_evento
         
+    except HTTPException:
+        session.rollback()
+        raise
     except Exception as e:
         session.rollback()
         raise HTTPException(
