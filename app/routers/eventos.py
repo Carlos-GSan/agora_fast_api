@@ -19,7 +19,7 @@ async def crear_evento(
     """
     try:
         # Crear el evento principal
-        evento_data = evento.dict(exclude={"oficiales", "detenidos", "motivos"})
+        evento_data = evento.model_dump(exclude={"oficiales", "detenidos", "motivos"})
         db_evento = Evento(**evento_data)
         session.add(db_evento)
         session.flush()  # Para obtener el iph_id generado
@@ -113,7 +113,7 @@ async def actualizar_evento(
         )
     
     # Actualizar campos proporcionados
-    update_data = evento_update.dict(exclude_unset=True)
+    update_data = evento_update.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(db_evento, field, value)
     

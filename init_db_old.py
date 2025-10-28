@@ -1,11 +1,10 @@
 """
 Script para inicializar la base de datos con datos de ejemplo
-Esquema actualizado con los nuevos campos
 """
 from sqlmodel import Session, select
 from app.config.database import engine, create_db_and_tables
 from app.models.models import (
-    TpoEvento, Region, Unidades, Oficial, 
+    TpoEvento, Intervencion, Region, Unidades, Oficial, 
     Detenido, TipoMotivo, Motivos, Droga, Arma
 )
 from datetime import datetime
@@ -17,7 +16,6 @@ def init_db():
     print("Tablas creadas exitosamente.")
     
     print("Insertando datos de ejemplo...")
-    
     with Session(engine) as session:
         try:
             # Tipos de Evento
@@ -34,6 +32,20 @@ def init_db():
                 if not existing:
                     tipo = TpoEvento(**tipo_data)
                     session.add(tipo)
+            
+            # Intervenciones
+            intervenciones = [
+                {"intervencion_desc": "Reporte"},
+                {"intervencion_desc": "Recorrido"},
+                {"intervencion_desc": "Operativo"},
+            ]
+            
+            for interv_data in intervenciones:
+                statement = select(Intervencion).where(Intervencion.intervencion_desc == interv_data["intervencion_desc"])
+                existing = session.exec(statement).first()
+                if not existing:
+                    interv = Intervencion(**interv_data)
+                    session.add(interv)
             
             # Regiones
             regiones = [
@@ -71,31 +83,37 @@ def init_db():
                     unidad = Unidades(**unidad_data)
                     session.add(unidad)
             
-            # Oficiales con nuevo esquema
+            # Oficiales
             oficiales = [
-                {"fullname": "Juan Pérez García", "telefono": "662-123-4567", "correo_electronico": "juan.perez@policia.mx"},
-                {"fullname": "María López Martínez", "telefono": "662-234-5678", "correo_electronico": "maria.lopez@policia.mx"},
-                {"fullname": "Carlos González Rodríguez", "telefono": "662-345-6789", "correo_electronico": "carlos.gonzalez@policia.mx"},
-                {"fullname": "Ana Hernández Silva", "telefono": "662-456-7890", "correo_electronico": "ana.hernandez@policia.mx"}
+                {"nombre_oficial": "Juan", "apepat_oficial": "Pérez", "apemat_oficial": "García"},
+                {"nombre_oficial": "María", "apepat_oficial": "López", "apemat_oficial": "Martínez"},
+                {"nombre_oficial": "Carlos", "apepat_oficial": "González", "apemat_oficial": "Rodríguez"},
+                {"nombre_oficial": "Ana", "apepat_oficial": "Hernández", "apemat_oficial": "Silva"}
             ]
             
             for oficial_data in oficiales:
-                statement = select(Oficial).where(Oficial.correo_electronico == oficial_data["correo_electronico"])
+                statement = select(Oficial).where(
+                    Oficial.nombre_oficial == oficial_data["nombre_oficial"],
+                    Oficial.apepat_oficial == oficial_data["apepat_oficial"]
+                )
                 existing = session.exec(statement).first()
                 if not existing:
                     oficial = Oficial(**oficial_data)
                     session.add(oficial)
             
-            # Detenidos con nuevo esquema
+            # Detenidos de ejemplo
             detenidos = [
-                {"full_name": "Juan Perengano López", "edad": 35, "rfc": "PELJ850315ABC"},
-                {"full_name": "María Sánchez Pérez", "edad": 28, "rfc": "SAPM960820DEF"},
-                {"full_name": "Carlos García Ramírez", "edad": 42, "rfc": "GARC810205GHI"},
-                {"full_name": "Ana Morales Torres", "edad": 31, "rfc": "MOTA920918JKL"}
+                {"nombre_det": "Juan", "apepat_det": "Perengano", "apemat_det": "López", "edad": 35, "sexo": "M"},
+                {"nombre_det": "María", "apepat_det": "Sánchez", "apemat_det": "Pérez", "edad": 28, "sexo": "F"},
+                {"nombre_det": "Carlos", "apepat_det": "García", "apemat_det": "Ramírez", "edad": 42, "sexo": "M"},
+                {"nombre_det": "Ana", "apepat_det": "Morales", "apemat_det": "Torres", "edad": 31, "sexo": "F"}
             ]
             
             for detenido_data in detenidos:
-                statement = select(Detenido).where(Detenido.full_name == detenido_data["full_name"])
+                statement = select(Detenido).where(
+                    Detenido.nombre_det == detenido_data["nombre_det"],
+                    Detenido.apepat_det == detenido_data["apepat_det"]
+                )
                 existing = session.exec(statement).first()
                 if not existing:
                     detenido = Detenido(**detenido_data)

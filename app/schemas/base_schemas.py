@@ -1,13 +1,10 @@
-from sqlmodel import SQLModel
+from sqlmodel import SQLModel, Field
 from datetime import datetime
 from typing import Optional, List
 
 # Esquemas para crear (sin ID)
 class TpoEventoCreate(SQLModel):
     tpo_evento_desc: str
-
-class IntervencionCreate(SQLModel):
-    intervencion_desc: str
 
 class RegionCreate(SQLModel):
     region_desc: str
@@ -21,16 +18,14 @@ class UnidadesCreate(SQLModel):
     activo: bool = True
 
 class OficialCreate(SQLModel):
-    nombre_oficial: str
-    apepat_oficial: str
-    apemat_oficial: Optional[str] = None
+    fullname: str = Field(..., description="Nombre completo del oficial")
+    telefono: Optional[str] = Field(None, description="Número de teléfono")
+    correo_electronico: str = Field(..., description="Correo electrónico único")
 
 class DetenidoCreate(SQLModel):
-    nombre_det: str
-    apepat_det: str
-    apemat_det: Optional[str] = None
-    edad: Optional[int] = None
-    sexo: Optional[str] = None
+    full_name: str = Field(..., description="Nombre completo del detenido")
+    edad: Optional[int] = Field(None, description="Edad del detenido")
+    rfc: Optional[str] = Field(None, description="RFC del detenido")
 
 class TipoMotivoCreate(SQLModel):
     tipo_motivo: str
@@ -46,15 +41,21 @@ class ArmaCreate(SQLModel):
     tpo_arma: str
     nombre_arma: str
 
+# Esquemas para actualizar
+class OficialUpdate(SQLModel):
+    fullname: Optional[str] = None
+    telefono: Optional[str] = None
+    correo_electronico: Optional[str] = None
+
+class DetenidoUpdate(SQLModel):
+    full_name: Optional[str] = None
+    edad: Optional[int] = None
+    rfc: Optional[str] = None
+
 # Esquemas para leer (con ID, heredan del modelo principal)
-# Estos esquemas son útiles para respuestas de API sin relaciones completas
 class TpoEventoRead(SQLModel):
     id_tpo_evento: int
     tpo_evento_desc: str
-
-class IntervencionRead(SQLModel):
-    id_intervencion: int
-    intervencion_desc: str
 
 class RegionRead(SQLModel):
     id_region: int
@@ -71,17 +72,15 @@ class UnidadesRead(SQLModel):
 
 class OficialRead(SQLModel):
     id_oficial: int
-    nombre_oficial: str
-    apepat_oficial: str
-    apemat_oficial: Optional[str] = None
+    fullname: str
+    telefono: Optional[str] = None
+    correo_electronico: str
 
 class DetenidoRead(SQLModel):
     id_detenido: int
-    nombre_det: str
-    apepat_det: str
-    apemat_det: Optional[str] = None
+    full_name: str
     edad: Optional[int] = None
-    sexo: Optional[str] = None
+    rfc: Optional[str] = None
 
 class TipoMotivoRead(SQLModel):
     tipo_motivo_id: int

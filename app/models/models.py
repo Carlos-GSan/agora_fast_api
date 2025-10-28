@@ -1,6 +1,13 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from typing import Optional, List
+from enum import Enum
+
+# Enum para tipos de intervención
+class TipoIntervencion(str, Enum):
+    RECORRIDO = "recorrido"
+    REPORTE = "reporte"
+    OPERATIVO = "operativo"
 
 # Modelos SQLModel (combinan Pydantic y SQLAlchemy)
 
@@ -12,15 +19,6 @@ class TpoEvento(SQLModel, table=True):
     
     # Relationships
     eventos: List["Evento"] = Relationship(back_populates="tipo_evento")
-
-class Intervencion(SQLModel, table=True):
-    __tablename__ = "intervencion"
-    
-    id_intervencion: Optional[int] = Field(default=None, primary_key=True)
-    intervencion_desc: str
-    
-    # Relationships
-    eventos: List["Evento"] = Relationship(back_populates="intervencion")
 
 class Region(SQLModel, table=True):
     __tablename__ = "region"
@@ -49,9 +47,9 @@ class Oficial(SQLModel, table=True):
     __tablename__ = "oficial"
     
     id_oficial: Optional[int] = Field(default=None, primary_key=True)
-    nombre_oficial: str
-    apepat_oficial: str
-    apemat_oficial: Optional[str] = None
+    fullname: str = Field(..., description="Nombre completo del oficial")
+    telefono: Optional[str] = Field(None, description="Número de teléfono")
+    correo_electronico: str = Field(..., unique=True, description="Correo electrónico único")
     
     # Relationships
     oficial_eventos: List["OficialEvento"] = Relationship(back_populates="oficial")
@@ -60,11 +58,9 @@ class Detenido(SQLModel, table=True):
     __tablename__ = "detenido"
     
     id_detenido: Optional[int] = Field(default=None, primary_key=True)
-    nombre_det: str
-    apepat_det: str
-    apemat_det: Optional[str] = None
-    edad: Optional[int] = None
-    sexo: Optional[str] = None
+    full_name: str = Field(..., description="Nombre completo del detenido")
+    edad: Optional[int] = Field(None, description="Edad del detenido")
+    rfc: Optional[str] = Field(None, description="RFC del detenido")
     
     # Relationships
     detenido_eventos: List["DetenidoEvento"] = Relationship(back_populates="detenido")
@@ -113,7 +109,7 @@ class Evento(SQLModel, table=True):
     
     iph_id: Optional[int] = Field(default=None, primary_key=True)
     id_tpo_evento: Optional[int] = Field(default=None, foreign_key="tpo_evento.id_tpo_evento")
-    id_intervencion: Optional[int] = Field(default=None, foreign_key="intervencion.id_intervencion")
+    intervencion: Optional[TipoIntervencion] = Field(None, description="Tipo de intervención")
     id_region: Optional[int] = Field(default=None, foreign_key="region.id_region")
     turno: Optional[str] = None
     id_unidad_vehi: Optional[int] = Field(default=None, foreign_key="unidades.id_unidad_vehic")
@@ -126,7 +122,6 @@ class Evento(SQLModel, table=True):
     
     # Relationships
     tipo_evento: Optional[TpoEvento] = Relationship(back_populates="eventos")
-    intervencion: Optional[Intervencion] = Relationship(back_populates="eventos")
     region: Optional[Region] = Relationship(back_populates="eventos")
     unidad: Optional[Unidades] = Relationship(back_populates="eventos")
     oficial_eventos: List["OficialEvento"] = Relationship(back_populates="evento")
