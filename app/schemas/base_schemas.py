@@ -1,6 +1,7 @@
 from sqlmodel import SQLModel, Field
 from datetime import datetime
 from typing import Optional, List
+from app.models.models import RolOficial
 
 # Esquemas para crear (sin ID)
 class TpoEventoCreate(SQLModel):
@@ -21,6 +22,8 @@ class OficialCreate(SQLModel):
     fullname: str = Field(..., description="Nombre completo del oficial")
     telefono: Optional[str] = Field(None, description="Número de teléfono")
     correo_electronico: str = Field(..., description="Correo electrónico único")
+    rol: RolOficial = Field(default=RolOficial.OFICIAL, description="Rol del oficial en el sistema")
+    id_telegram: Optional[int] = Field(None, description="ID de Telegram del oficial")
 
 class DetenidoCreate(SQLModel):
     full_name: str = Field(..., description="Nombre completo del detenido")
@@ -46,6 +49,8 @@ class OficialUpdate(SQLModel):
     fullname: Optional[str] = None
     telefono: Optional[str] = None
     correo_electronico: Optional[str] = None
+    rol: Optional[RolOficial] = None
+    id_telegram: Optional[int] = None
 
 class DetenidoUpdate(SQLModel):
     full_name: Optional[str] = None
@@ -75,6 +80,8 @@ class OficialRead(SQLModel):
     fullname: str
     telefono: Optional[str] = None
     correo_electronico: str
+    rol: RolOficial
+    id_telegram: Optional[int] = None
 
 class DetenidoRead(SQLModel):
     id_detenido: int

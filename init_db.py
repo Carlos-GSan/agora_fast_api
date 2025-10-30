@@ -6,7 +6,7 @@ from sqlmodel import Session, select
 from app.config.database import engine, create_db_and_tables
 from app.models.models import (
     TpoEvento, Region, Unidades, Oficial, 
-    Detenido, TipoMotivo, Motivos, Droga, Arma, TurnoEnum
+    Detenido, TipoMotivo, Motivos, Droga, Arma, TurnoEnum, RolOficial
 )
 from datetime import datetime
 
@@ -73,10 +73,34 @@ def init_db():
             
             # Oficiales con nuevo esquema
             oficiales = [
-                {"fullname": "Juan Pérez García", "telefono": "662-123-4567", "correo_electronico": "juan.perez@policia.mx"},
-                {"fullname": "María López Martínez", "telefono": "662-234-5678", "correo_electronico": "maria.lopez@policia.mx"},
-                {"fullname": "Carlos González Rodríguez", "telefono": "662-345-6789", "correo_electronico": "carlos.gonzalez@policia.mx"},
-                {"fullname": "Ana Hernández Silva", "telefono": "662-456-7890", "correo_electronico": "ana.hernandez@policia.mx"}
+                {
+                    "fullname": "Juan Pérez García", 
+                    "telefono": "662-123-4567", 
+                    "correo_electronico": "juan.perez@policia.mx",
+                    "rol": RolOficial.COMANDANTE,
+                    "id_telegram": 123456789
+                },
+                {
+                    "fullname": "María López Martínez", 
+                    "telefono": "662-234-5678", 
+                    "correo_electronico": "maria.lopez@policia.mx",
+                    "rol": RolOficial.ADMIN,
+                    "id_telegram": 987654321
+                },
+                {
+                    "fullname": "Carlos González Rodríguez", 
+                    "telefono": "662-345-6789", 
+                    "correo_electronico": "carlos.gonzalez@policia.mx",
+                    "rol": RolOficial.OFICIAL,
+                    "id_telegram": None
+                },
+                {
+                    "fullname": "Ana Hernández Silva", 
+                    "telefono": "662-456-7890", 
+                    "correo_electronico": "ana.hernandez@policia.mx",
+                    "rol": RolOficial.OFICIAL,
+                    "id_telegram": 456789123
+                }
             ]
             
             for oficial_data in oficiales:

@@ -2,6 +2,7 @@ from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from typing import Optional, List
 from enum import Enum
+from sqlalchemy import BigInteger
 
 # Enum para tipos de intervención
 class TipoIntervencion(str, Enum):
@@ -16,6 +17,12 @@ class TurnoEnum(str, Enum):
     C = "C"
     MIXTO = "Mixto"
     DIARIO = "Diario"
+
+# Enum para roles de oficial
+class RolOficial(str, Enum):
+    ADMIN = "admin"
+    OFICIAL = "oficial"
+    COMANDANTE = "comandante"
 
 # Modelos SQLModel (combinan Pydantic y SQLAlchemy)
 
@@ -58,6 +65,8 @@ class Oficial(SQLModel, table=True):
     fullname: str = Field(..., description="Nombre completo del oficial")
     telefono: Optional[str] = Field(None, description="Número de teléfono")
     correo_electronico: str = Field(..., unique=True, description="Correo electrónico único")
+    rol: RolOficial = Field(default=RolOficial.OFICIAL, description="Rol del oficial en el sistema")
+    id_telegram: Optional[int] = Field(None, sa_column=BigInteger(), description="ID de Telegram del oficial")
     
     # Relationships
     oficial_eventos: List["OficialEvento"] = Relationship(back_populates="oficial")

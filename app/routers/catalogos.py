@@ -135,6 +135,26 @@ async def actualizar_oficial(
             detail=f"Error al actualizar oficial: {str(e)}"
         )
 
+@router.get("/oficiales/telegram/{id_telegram}", response_model=OficialRead, status_code=status.HTTP_202_ACCEPTED)
+async def buscar_oficial_por_telegram(id_telegram: int, session: Session = Depends(get_session)):
+    """
+    Buscar un oficial por su ID de Telegram.
+    
+    - **id_telegram**: ID de Telegram del oficial a buscar
+    
+    Retorna 202 ACCEPTED si encuentra el oficial, 404 NOT FOUND si no existe.
+    """
+    statement = select(Oficial).where(Oficial.id_telegram == id_telegram)
+    oficial = session.exec(statement).first()
+    
+    if not oficial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No se encontró un oficial con ID de Telegram: {id_telegram}"
+        )
+    
+    return oficial
+
 # Endpoints para Detenidos
 @router.post("/detenidos/", response_model=DetenidoRead, status_code=status.HTTP_201_CREATED)
 async def crear_detenido(detenido: DetenidoCreate, session: Session = Depends(get_session)):
