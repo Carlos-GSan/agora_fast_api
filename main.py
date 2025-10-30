@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.config.settings import settings
 from app.routers import eventos_router, catalogos_router
 from app.config.database import create_db_and_tables
-from fastapi_mcp import FastApiMCP
+from fastapi_mcp import FastApiMCP  # Comentado para Docker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -58,7 +58,7 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    mcp = FastApiMCP(app)
+    mcp = FastApiMCP(app)  # Comentado para Docker
     mcp.mount_http()  # 👈 habilita POST en /mcp
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

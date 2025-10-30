@@ -12,7 +12,7 @@ from app.schemas.evento_schemas import (
 
 router = APIRouter(prefix="/eventos", tags=["eventos"])
 
-@router.post("/", response_model=EventoRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=EventoRead, status_code=status.HTTP_201_CREATED, operation_id="crear_evento")
 async def crear_evento(
     evento: EventoCreate,
     session: Session = Depends(get_session)
@@ -191,7 +191,7 @@ async def obtener_evento(
     
     return evento
 
-@router.put("/{iph_id}", response_model=EventoRead)
+@router.put("/{iph_id}", response_model=EventoRead, operation_id="update_evento")
 async def actualizar_evento(
     iph_id: int,
     evento_update: EventoUpdate,

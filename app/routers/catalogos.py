@@ -36,7 +36,7 @@ async def crear_tipo_evento(tipo_evento: TpoEventoCreate, session: Session = Dep
     session.refresh(db_tipo)
     return db_tipo
 
-@router.get("/tipos-evento/", response_model=List[TpoEventoRead])
+@router.get("/tipos-evento/", response_model=List[TpoEventoRead], operation_id="get_tipos_evento")
 async def obtener_tipos_evento(session: Session = Depends(get_session)):
     statement = select(TpoEvento)
     tipos = session.exec(statement).all()
@@ -51,7 +51,7 @@ async def crear_region(region: RegionCreate, session: Session = Depends(get_sess
     session.refresh(db_region)
     return db_region
 
-@router.get("/regiones/", response_model=List[RegionRead])
+@router.get("/regiones/", response_model=List[RegionRead], operation_id="get_regiones")
 async def obtener_regiones(session: Session = Depends(get_session)):
     statement = select(Region)
     regiones = session.exec(statement).all()
@@ -66,7 +66,7 @@ async def crear_unidad(unidad: UnidadesCreate, session: Session = Depends(get_se
     session.refresh(db_unidad)
     return db_unidad
 
-@router.get("/unidades/", response_model=List[UnidadesRead])
+@router.get("/unidades/", response_model=List[UnidadesRead], operation_id="get_unidades")
 async def obtener_unidades(activo: bool = None, session: Session = Depends(get_session)):
     statement = select(Unidades)
     if activo is not None:
@@ -95,13 +95,13 @@ async def crear_oficial(oficial: OficialCreate, session: Session = Depends(get_s
             detail=f"Error al crear oficial: {str(e)}"
         )
 
-@router.get("/oficiales/", response_model=List[OficialRead])
+@router.get("/oficiales/", response_model=List[OficialRead], operation_id="get_oficiales")
 async def obtener_oficiales(session: Session = Depends(get_session)):
     statement = select(Oficial)
     oficiales = session.exec(statement).all()
     return oficiales
 
-@router.put("/oficiales/{id_oficial}", response_model=OficialRead)
+@router.put("/oficiales/{id_oficial}", response_model=OficialRead, operation_id="upd_oficial")
 async def actualizar_oficial(
     id_oficial: int,
     oficial_update: OficialUpdate,
@@ -156,7 +156,7 @@ async def buscar_oficial_por_telegram(id_telegram: int, session: Session = Depen
     return oficial
 
 # Endpoints para Detenidos
-@router.post("/detenidos/", response_model=DetenidoRead, status_code=status.HTTP_201_CREATED)
+@router.post("/detenidos/", response_model=DetenidoRead, status_code=status.HTTP_201_CREATED, operation_id="crear_detenido")
 async def crear_detenido(detenido: DetenidoCreate, session: Session = Depends(get_session)):
     db_detenido = Detenido(**detenido.model_dump())
     session.add(db_detenido)
@@ -164,7 +164,7 @@ async def crear_detenido(detenido: DetenidoCreate, session: Session = Depends(ge
     session.refresh(db_detenido)
     return db_detenido
 
-@router.get("/detenidos/", response_model=List[DetenidoRead])
+@router.get("/detenidos/", response_model=List[DetenidoRead], operation_id="get_detenidos")
 async def obtener_detenidos(session: Session = Depends(get_session)):
     statement = select(Detenido)
     detenidos = session.exec(statement).all()
@@ -201,7 +201,7 @@ async def crear_tipo_motivo(tipo_motivo: TipoMotivoCreate, session: Session = De
     session.refresh(db_tipo_motivo)
     return db_tipo_motivo
 
-@router.get("/tipos-motivo/", response_model=List[TipoMotivoRead])
+@router.get("/tipos-motivo/", response_model=List[TipoMotivoRead], operation_id="get_tipos_motivo")
 async def obtener_tipos_motivo(session: Session = Depends(get_session)):
     statement = select(TipoMotivo)
     tipos_motivo = session.exec(statement).all()
@@ -216,7 +216,7 @@ async def crear_motivo(motivo: MotivosCreate, session: Session = Depends(get_ses
     session.refresh(db_motivo)
     return db_motivo
 
-@router.get("/motivos/", response_model=List[MotivosRead])
+@router.get("/motivos/", response_model=List[MotivosRead], operation_id="get_motivos_catalogo")
 async def obtener_motivos(tipo_motivo_id: int = None, session: Session = Depends(get_session)):
     statement = select(Motivos)
     if tipo_motivo_id:
@@ -233,7 +233,7 @@ async def crear_droga(droga: DrogaCreate, session: Session = Depends(get_session
     session.refresh(db_droga)
     return db_droga
 
-@router.get("/drogas/", response_model=List[DrogaRead])
+@router.get("/drogas/", response_model=List[DrogaRead], operation_id="get_drogas_catalogo")
 async def obtener_drogas(session: Session = Depends(get_session)):
     statement = select(Droga)
     drogas = session.exec(statement).all()
@@ -248,7 +248,7 @@ async def crear_arma(arma: ArmaCreate, session: Session = Depends(get_session)):
     session.refresh(db_arma)
     return db_arma
 
-@router.get("/armas/", response_model=List[ArmaRead])
+@router.get("/armas/", response_model=List[ArmaRead], operation_id="get_armas_catalogo")
 async def obtener_armas(session: Session = Depends(get_session)):
     statement = select(Arma)
     armas = session.exec(statement).all()
