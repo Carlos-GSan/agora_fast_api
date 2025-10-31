@@ -1,24 +1,53 @@
 # Makefile para gestión de Docker del proyecto Agora FastAPI
 
-.PHONY: help build up down restart logs clean test health backup
+.PHONY: help build up down restart logs clean test health backup postgres-up postgres-down
 
 # Variables
 COMPOSE_FILE = docker-compose.yml
+POSTGRES_COMPOSE_FILE = docker-compose.postgres.yml
 SERVICE_NAME = agora-api
 CONTAINER_NAME = agora-fastapi
+POSTGRES_CONTAINER_NAME = agora-fastapi-postgres
 
 help: ## Mostrar esta ayuda
 	@echo "Comandos disponibles:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "🗃️  SQLite (por defecto):"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | grep -v postgres | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo ""
+	@echo "🐘 PostgreSQL:"
+	@grep -E '^postgres.*:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
-build: ## Construir la imagen Docker
+build: ## Construir la imagen Docker (SQLite)
 	docker-compose build --no-cache
 
-up: ## Iniciar servicios en background
+up: ## Iniciar servicios en background (SQLite)
 	docker-compose up -d
 
-down: ## Parar y eliminar contenedores
+down: ## Parar y eliminar contenedores (SQLite)
 	docker-compose down
+
+# Comandos específicos para PostgreSQL
+postgres-up: ## Iniciar servicios con PostgreSQL
+	docker-compose -f $(POSTGRES_COMPOSE_FILE) up -d --build
+
+postgres-down: ## Parar servicios PostgreSQL
+	docker-compose -f $(POSTGRES_COMPOSE_FILE) down
+
+postgres-logs: ## Ver logs de PostgreSQL
+	docker-compose -f $(POSTGRES_COMPOSE_FILE) logs -f
+
+postgres-shell: ## Acceder al shell de PostgreSQL
+	docker-compose -f $(POSTGRES_COMPOSE_FILE) exec postgres psql -U agora_user -d agora_db
+
+postgres-backup: ## Crear backup de PostgreSQL
+	@echo "Creando backup de PostgreSQL..."
+	@mkdir -p backups
+	@docker-compose -f $(POSTGRES_COMPOSE_FILE) exec postgres pg_dump -U agora_user agora_db > ./backups/postgres_backup_$(shell date +%Y%m%d_%H%M%S).sql
+	@echo "✅ Backup de PostgreSQL creado en ./backups/"
+
+postgres-status: ## Mostrar estado de servicios PostgreSQL
+	docker-compose -f $(POSTGRES_COMPOSE_FILE) ps
 
 restart: ## Reiniciar servicios
 	docker-compose restart

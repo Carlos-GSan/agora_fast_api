@@ -21,6 +21,7 @@ markdown-it-py==4.0.0
 MarkupSafe==3.0.3
 mcp==1.19.0
 mdurl==0.1.2
+psycopg2-binary==2.9.9
 pydantic==2.12.3
 pydantic-settings==2.11.0
 pydantic_core==2.41.4

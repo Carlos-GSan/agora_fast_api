@@ -1,0 +1,61 @@
+services:
+  # Servicio de la aplicación FastAPI con PostgreSQL
+  agora-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agora-fastapi-postgres
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://agora_user:agora_password@postgres:5432/agora_db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-here}
+      - ALGORITHM=${ALGORITHM:-HS256}
+      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      - APP_NAME=${APP_NAME:-Sistema IPH}
+      - VERSION=${VERSION:-1.0.0}
+      - DEBUG=${DEBUG:-False}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - agora-network
+
+  # Servicio de base de datos PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: agora-postgres
+    environment:
+      POSTGRES_DB: agora_db
+      POSTGRES_USER: agora_user
+      POSTGRES_PASSWORD: agora_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agora_user -d agora_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - agora-network
+
+networks:
+  agora-network:  
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local

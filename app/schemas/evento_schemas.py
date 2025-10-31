@@ -33,6 +33,9 @@ class EventoCreate(SQLModel):
     folio_cecom: Optional[int] = Field(None, description="Folio CECOM (numérico)")
     colonia: Optional[str] = Field(None, description="Colonia donde ocurrió el evento")
     calle: Optional[str] = Field(None, description="Calle donde ocurrió el evento")
+    cuadrante: Optional[str] = Field(None, description="Cuadrante del evento")
+    region_geo: Optional[str] = Field(None, description="Región geográfica del evento")
+    delegacion: Optional[str] = Field(None, description="Delegación del evento")
     georreferencia: Optional[str] = Field(None, description="Coordenadas GPS del evento")
     fecha_evento: Optional[datetime] = Field(None, description="Fecha y hora del evento")
     narrativa: Optional[str] = Field(None, description="Narrativa del evento")
@@ -62,6 +65,9 @@ class EventoUpdate(SQLModel):
     folio_cecom: Optional[int] = None
     colonia: Optional[str] = None
     calle: Optional[str] = None
+    cuadrante: Optional[str] = None
+    region_geo: Optional[str] = None
+    delegacion: Optional[str] = None
     georreferencia: Optional[str] = None
     fecha_evento: Optional[datetime] = None
     narrativa: Optional[str] = None
@@ -76,6 +82,9 @@ class EventoRead(SQLModel):
     folio_cecom: Optional[int] = None
     colonia: Optional[str] = None
     calle: Optional[str] = None
+    cuadrante: Optional[str] = None
+    region_geo: Optional[str] = None
+    delegacion: Optional[str] = None
     georreferencia: Optional[str] = None
     fecha_evento: Optional[datetime] = None
     narrativa: Optional[str] = None

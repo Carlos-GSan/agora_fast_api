@@ -12,6 +12,13 @@ class Settings(BaseSettings):
     app_name: str = os.getenv("APP_NAME", "Sistema IPH")
     version: str = os.getenv("VERSION", "1.0.0")
     debug: bool = os.getenv("DEBUG", "True").lower() == "true"
+    
+    # PostgreSQL configuration
+    postgres_user: str = os.getenv("POSTGRES_USER", "")
+    postgres_password: str = os.getenv("POSTGRES_PASSWORD", "")
+    postgres_db: str = os.getenv("POSTGRES_DB", "")
+    postgres_host: str = os.getenv("POSTGRES_HOST", "localhost")
+    postgres_port: int = int(os.getenv("POSTGRES_PORT", "5432"))
 
     class Config:
         env_file = ".env"

@@ -133,6 +133,9 @@ class Evento(SQLModel, table=True):
     folio_cecom: Optional[int] = Field(None, description="Folio CECOM (numérico)")
     colonia: Optional[str] = None
     calle: Optional[str] = None
+    cuadrante: Optional[str] = Field(None, description="Cuadrante del evento")
+    region_geo: Optional[str] = Field(None, description="Región geográfica del evento")
+    delegacion: Optional[str] = Field(None, description="Delegación del evento")
     georreferencia: Optional[str] = None
     fecha_evento: Optional[datetime] = None
     narrativa: Optional[str] = None
