@@ -75,7 +75,7 @@ class Detenido(SQLModel, table=True):
     __tablename__ = "detenido"
     
     id_detenido: Optional[int] = Field(default=None, primary_key=True)
-    full_name: str = Field(..., description="Nombre completo del detenido")
+    full_name: str = Field(..., unique=True, description="Nombre completo del detenido")
     edad: Optional[int] = Field(None, description="Edad del detenido")
     rfc: Optional[str] = Field(None, description="RFC del detenido")
     
@@ -125,20 +125,20 @@ class Evento(SQLModel, table=True):
     __tablename__ = "evento"
     
     iph_id: Optional[int] = Field(default=None, primary_key=True)
-    id_tpo_evento: Optional[int] = Field(default=None, foreign_key="tpo_evento.id_tpo_evento")
-    intervencion: Optional[TipoIntervencion] = Field(None, description="Tipo de intervención")
-    id_region: Optional[int] = Field(default=None, foreign_key="region.id_region")
-    turno: Optional[TurnoEnum] = Field(None, description="Turno del evento")
-    id_unidad_vehi: Optional[int] = Field(default=None, foreign_key="unidades.id_unidad_vehic")
-    folio_cecom: Optional[int] = Field(None, description="Folio CECOM (numérico)")
-    colonia: Optional[str] = None
+    id_tpo_evento: int = Field(..., foreign_key="tpo_evento.id_tpo_evento", description="ID del tipo de evento (obligatorio)")
+    intervencion: TipoIntervencion = Field(..., description="Tipo de intervención (obligatorio)")
+    id_region: int = Field(..., foreign_key="region.id_region", description="ID de la región (obligatorio)")
+    turno: TurnoEnum = Field(..., description="Turno del evento (obligatorio)")
+    id_unidad_vehi: int = Field(..., foreign_key="unidades.id_unidad_vehic", description="ID de la unidad vehicular (obligatorio)")
+    folio_cecom: int = Field(..., description="Folio CECOM (numérico, obligatorio)")
+    colonia: str = Field(..., description="Colonia del evento (obligatorio)")
     calle: Optional[str] = None
-    cuadrante: Optional[str] = Field(None, description="Cuadrante del evento")
-    region_geo: Optional[str] = Field(None, description="Región geográfica del evento")
-    delegacion: Optional[str] = Field(None, description="Delegación del evento")
-    georreferencia: Optional[str] = None
-    fecha_evento: Optional[datetime] = None
-    narrativa: Optional[str] = None
+    cuadrante: str = Field(..., description="Cuadrante del evento (obligatorio)")
+    region_geo: str = Field(..., description="Región geográfica del evento (obligatorio)")
+    delegacion: str = Field(..., description="Delegación del evento (obligatorio)")
+    georreferencia: str = Field(..., description="Georreferencia del evento (obligatorio)")
+    fecha_evento: datetime = Field(..., description="Fecha del evento (obligatorio)")
+    narrativa: str = Field(..., description="Narrativa del evento (obligatorio)")
     
     # Relationships
     tipo_evento: Optional[TpoEvento] = Relationship(back_populates="eventos")

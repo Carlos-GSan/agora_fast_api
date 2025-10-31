@@ -28,17 +28,17 @@ class EventoCreate(SQLModel):
     id_tpo_evento: int = Field(..., description="ID del tipo de evento (obligatorio)")
     intervencion: TipoIntervencion = Field(..., description="Tipo de intervención (obligatorio)")
     id_region: int = Field(..., description="ID de la región (obligatorio)")
-    turno: Optional[TurnoEnum] = Field(None, description="Turno del evento")
+    turno: TurnoEnum = Field(..., description="Turno del evento (obligatorio)")
     id_unidad_vehi: int = Field(..., description="ID de la unidad vehicular (obligatorio)")
-    folio_cecom: Optional[int] = Field(None, description="Folio CECOM (numérico)")
-    colonia: Optional[str] = Field(None, description="Colonia donde ocurrió el evento")
+    folio_cecom: int = Field(..., description="Folio CECOM (numérico, obligatorio)")
+    colonia: str = Field(..., description="Colonia donde ocurrió el evento (obligatorio)")
     calle: Optional[str] = Field(None, description="Calle donde ocurrió el evento")
-    cuadrante: Optional[str] = Field(None, description="Cuadrante del evento")
-    region_geo: Optional[str] = Field(None, description="Región geográfica del evento")
-    delegacion: Optional[str] = Field(None, description="Delegación del evento")
-    georreferencia: Optional[str] = Field(None, description="Coordenadas GPS del evento")
-    fecha_evento: Optional[datetime] = Field(None, description="Fecha y hora del evento")
-    narrativa: Optional[str] = Field(None, description="Narrativa del evento")
+    cuadrante: str = Field(..., description="Cuadrante del evento (obligatorio)")
+    region_geo: str = Field(..., description="Región geográfica del evento (obligatorio)")
+    delegacion: str = Field(..., description="Delegación del evento (obligatorio)")
+    georreferencia: str = Field(..., description="Coordenadas GPS del evento (obligatorio)")
+    fecha_evento: datetime = Field(..., description="Fecha y hora del evento (obligatorio)")
+    narrativa: str = Field(..., description="Narrativa del evento (obligatorio)")
     
     # Listas de relaciones para crear junto con el evento (obligatorias)
     oficiales: List[OficialEventoCreate] = Field(
@@ -74,20 +74,20 @@ class EventoUpdate(SQLModel):
 
 class EventoRead(SQLModel):
     iph_id: int
-    id_tpo_evento: Optional[int] = None
-    intervencion: Optional[TipoIntervencion] = None
-    id_region: Optional[int] = None
-    turno: Optional[TurnoEnum] = None
-    id_unidad_vehi: Optional[int] = None
-    folio_cecom: Optional[int] = None
-    colonia: Optional[str] = None
+    id_tpo_evento: int
+    intervencion: TipoIntervencion
+    id_region: int
+    turno: TurnoEnum
+    id_unidad_vehi: int
+    folio_cecom: int
+    colonia: str
     calle: Optional[str] = None
-    cuadrante: Optional[str] = None
-    region_geo: Optional[str] = None
-    delegacion: Optional[str] = None
-    georreferencia: Optional[str] = None
-    fecha_evento: Optional[datetime] = None
-    narrativa: Optional[str] = None
+    cuadrante: str
+    region_geo: str
+    delegacion: str
+    georreferencia: str
+    fecha_evento: datetime
+    narrativa: str
 
 # Esquema con relaciones completas (para respuestas detalladas)
 class EventoReadWithRelations(EventoRead):

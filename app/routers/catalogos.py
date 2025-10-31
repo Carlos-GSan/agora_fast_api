@@ -67,10 +67,18 @@ async def crear_unidad(unidad: UnidadesCreate, session: Session = Depends(get_se
     return db_unidad
 
 @router.get("/unidades/", response_model=List[UnidadesRead], operation_id="get_unidades")
-async def obtener_unidades(activo: bool = None, session: Session = Depends(get_session)):
+async def obtener_unidades(activo: bool = None, vehic: str = None, session: Session = Depends(get_session)):
+    """_summary_
+    Obtener unidades, con opción de filtrar por estado activo y/o por vehículo (vehic).
+    - **activo**: Filtrar unidades por estado activo (True/False)
+    - **vehic**: Filtrar unidades que contengan el texto en el campo vehículo
+    Retorna una lista de unidades que coinciden con los filtros proporcionados.
+    """
     statement = select(Unidades)
     if activo is not None:
         statement = statement.where(Unidades.activo == activo)
+    if vehic is not None:
+        statement = statement.where(Unidades.vehic.ilike(f"%{vehic}%"))
     unidades = session.exec(statement).all()
     return unidades
 
@@ -158,15 +166,48 @@ async def buscar_oficial_por_telegram(id_telegram: int, session: Session = Depen
 # Endpoints para Detenidos
 @router.post("/detenidos/", response_model=DetenidoRead, status_code=status.HTTP_201_CREATED, operation_id="crear_detenido")
 async def crear_detenido(detenido: DetenidoCreate, session: Session = Depends(get_session)):
-    db_detenido = Detenido(**detenido.model_dump())
+    # Validar que la edad sea obligatoria
+    if not detenido.edad:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="La edad es obligatoria"
+        )
+    
+    # Procesar el nombre completo: mayúsculas y sin acentos (excepto ñ)
+    full_name = detenido.full_name
+    if full_name:
+        # Remover acentos excepto ñ
+        accent_map = {
+            'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+            'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+            'ü': 'u', 'Ü': 'U'
+        }
+        for accent, normal in accent_map.items():
+            full_name = full_name.replace(accent, normal)
+        
+        # Convertir a mayúsculas
+        full_name = full_name.upper()
+    
+    # Crear el objeto con el nombre procesado
+    detenido_data = detenido.model_dump()
+    detenido_data['full_name'] = full_name
+    
+    db_detenido = Detenido(**detenido_data)
     session.add(db_detenido)
     session.commit()
     session.refresh(db_detenido)
     return db_detenido
 
 @router.get("/detenidos/", response_model=List[DetenidoRead], operation_id="get_detenidos")
-async def obtener_detenidos(session: Session = Depends(get_session)):
+async def obtener_detenidos(full_name: str = None, session: Session = Depends(get_session)):
+    """_summary_
+    Obtener detenidos, con opción de filtrar por nombre completo (full_name).
+    - **full_name**: Nombre completo o parte del nombre para filtrar los detenidos
+    Retorna una lista de detenidos que coinciden con el filtro proporcionado.
+    """
     statement = select(Detenido)
+    if full_name is not None:
+        statement = statement.where(Detenido.full_name.ilike(f"%{full_name}%"))
     detenidos = session.exec(statement).all()
     return detenidos
 
@@ -217,10 +258,12 @@ async def crear_motivo(motivo: MotivosCreate, session: Session = Depends(get_ses
     return db_motivo
 
 @router.get("/motivos/", response_model=List[MotivosRead], operation_id="get_motivos_catalogo")
-async def obtener_motivos(tipo_motivo_id: int = None, session: Session = Depends(get_session)):
+async def obtener_motivos(tipo_motivo_id: int = None, motivo: str = None, session: Session = Depends(get_session)):
     statement = select(Motivos)
     if tipo_motivo_id:
         statement = statement.where(Motivos.tipo_motivo_id == tipo_motivo_id)
+    if motivo:
+        statement = statement.where(Motivos.motivo.ilike(f"%{motivo}%"))
     motivos = session.exec(statement).all()
     return motivos
 
